@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sena'nın TOBB Takvimi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:   #ffffff;
+      --bg2:  #f5f4f1;
+      --text: #1a1a18;
+      --text2:#6b6a65;
+      --text3:#9e9d98;
+      --border: rgba(0,0,0,0.85);
+      --border-light: rgba(0,0,0,0.15);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:   #141412;
+        --bg2:  #1e1e1c;
+        --text: #f0efe8;
+        --text2:#9e9d98;
+        --text3:#6b6a65;
+        --border: rgba(255,255,255,0.85);
+        --border-light: rgba(255,255,255,0.15);
+      }
+    }
+
+    body {
+      font-family: 'Space Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap { max-width: 580px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+    .header {
+      border: 2px solid var(--border);
+      padding: 1rem 1.25rem 0.9rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--text);
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      font-size: 10px;
+      color: var(--text2);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    .date-chip {
+      font-size: 10px;
+      border: 1.5px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+      color: var(--text);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .status-block {
+      border: 2px solid var(--border);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .s-icon {
+      width: 38px; height: 38px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .s-icon.green { background: #9FE1CB; }
+    .s-icon.amber { background: #FAC775; }
+    .s-icon.red   { background: #F7C1C1; }
+
+    .s-label-top {
+      font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text2); margin-bottom: 4px;
+    }
+    .s-main { font-size: 16px; font-weight: 700; color: var(--text); }
+    .s-sub  { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+
+    .sec-head {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text2); margin: 1.5rem 0 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sec-head::after { content:''; flex:1; height:1px; background: var(--border-light); }
+
+    .ev-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px dashed var(--border-light);
+    }
+    .ev-row:last-child { border-bottom: none; }
+
+    .ev-date { font-size: 11px; font-weight: 700; color: var(--text2); min-width: 56px; padding-top: 2px; }
+    .ev-name { font-size: 13px; color: var(--text); line-height: 1.4; }
+    .ev-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+    .tag {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 3px 8px; border: 1.5px solid;
+      border-radius: 0;
+      margin-left: auto; flex-shrink: 0; align-self: flex-start;
+    }
+    .tag-exam    { border-color: #A32D2D; color: #A32D2D; }
+    .tag-quiz    { border-color: #854F0B; color: #854F0B; }
+    .tag-final   { border-color: #993C1D; color: #993C1D; }
+    .tag-holiday { border-color: #3B6D11; color: #3B6D11; }
+
+    .del-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; background: none; border: none;
+      cursor: pointer; color: var(--text2); padding: 2px 4px; flex-shrink: 0;
+    }
+    .del-btn:hover { color: #A32D2D; }
+
+    .empty { font-size: 12px; color: var(--text2); padding: 10px 0; font-style: italic; }
+
+    .admin-wrap { margin-top: 2rem; border: 2px solid var(--border); }
+
+    .admin-toggle {
+      width: 100%; text-align: left; background: none; border: none;
+      padding: 12px 16px;
+      font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text); cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .admin-body { display: none; border-top: 2px solid var(--border); padding: 14px 16px 16px; }
+    .admin-body.open { display: block; }
+
+    .pin-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .pin-err { font-size: 11px; color: #A32D2D; display: none; margin-bottom: 8px; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-hidden { display: none; }
+
+    input[type=text], input[type=date], select {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      height: 34px; padding: 0 10px;
+      border: 1.5px solid var(--border);
+      background: var(--bg); color: var(--text);
+      border-radius: 0; width: 100%; outline: none;
+    }
+    input[type=text]:focus, input[type=date]:focus, select:focus {
+      outline: 2px solid var(--border); outline-offset: 1px;
+    }
+
+    .btn {
+      font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      background: var(--text); color: var(--bg);
+      cursor: pointer; border-radius: 0;
+    }
+    .btn:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div>
+      <div class="title">Sena'nın TOBB Takvimi</div>
+      <div class="subtitle">TOBB ETÜ — İktisat Bölümü</div>
+    </div>
+    <div class="date-chip" id="today-chip"></div>
+  </div>
+
+  <div class="status-block">
+    <div class="s-icon" id="s-icon"></div>
+    <div>
+      <div class="s-label-top">durum</div>
+      <div class="s-main" id="s-text"></div>
+      <div class="s-sub" id="s-desc"></div>
+    </div>
+  </div>
+
+  <div class="sec-head">yaklaşan sınavlar</div>
+  <div id="upcoming-list"></div>
+
+  <div class="sec-head">dönem takvimi</div>
+  <div id="fixed-list"></div>
+
+  <div class="admin-wrap">
+    <button class="admin-toggle" onclick="toggleAdmin()">
+      <span>+ sınav ekle</span>
+      <span id="adm-arrow">▼</span>
+    </button>
+    <div class="admin-body" id="adm-body">
+      <div class="pin-row" id="pin-row">
+        <input type="text" id="pin-in" placeholder="şifre" maxlength="6" style="max-width:110px;" onkeydown="if(event.key==='Enter')chkPin()"/>
+        <button class="btn" onclick="chkPin()">gir</button>
+      </div>
+      <div class="pin-err" id="pin-err">yanlış şifre</div>
+      <div class="form-hidden" id="form-area">
+        <div class="form-grid">
+          <input type="date" id="f-date"/>
+          <select id="f-type">
+            <option value="exam">vize</option>
+            <option value="quiz">quiz</option>
+            <option value="final">final</option>
+          </select>
+          <input type="text" id="f-name" placeholder="ders (örn. IKT424)" class="form-full"/>
+          <input type="text" id="f-desc" placeholder="açıklama (isteğe bağlı)" class="form-full"/>
+        </div>
+        <button class="btn" onclick="addEv()">ekle</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const PIN = "1234";
+const KEY = "sena_ev_v2";
+
+const FIXED = [
+  { date:"2026-03-30", name:"Bahar dönemi başlangıcı", type:"holiday" },
+  { date:"2026-04-23", name:"Ulusal egemenlik ve çocuk bayramı", type:"holiday" },
+  { date:"2026-05-01", name:"İşçi bayramı", type:"holiday" },
+  { date:"2026-05-19", name:"Atatürk'ü anma ve gençlik bayramı", type:"holiday" },
+  { date:"2026-06-01", name:"Bahar vize haftası başlangıcı", type:"exam" },
+  { date:"2026-06-07", name:"Bahar vize haftası sonu", type:"exam" },
+  { date:"2026-07-06", name:"Bahar final haftası başlangıcı", type:"final" },
+  { date:"2026-07-17", name:"Bahar final haftası sonu", type:"final" },
+  { date:"2026-07-20", name:"Bahar dönemi sonu", type:"holiday" },
+];
+
+const RULES = [
+  { s:"2026-06-01", e:"2026-06-07", label:"vize dönemi", icon:"✗", cls:"red",   desc:"Vizeler sürüyor — şu an pek müsait değil." },
+  { s:"2026-05-26", e:"2026-05-31", label:"vize yaklaşıyor", icon:"!", cls:"amber", desc:"Vize haftasına az kaldı." },
+  { s:"2026-07-06", e:"2026-07-17", label:"final dönemi", icon:"✗", cls:"red",   desc:"Finaller sürüyor — şu an pek müsait değil." },
+  { s:"2026-07-01", e:"2026-07-05", label:"final yaklaşıyor", icon:"!", cls:"amber", desc:"Final haftasına az kaldı." },
+  { s:"2026-07-18", e:"2026-09-05", label:"yaz tatili", icon:"✓", cls:"green", desc:"Dönem bitti! Büyük ihtimalle müsait." },
+];
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||"[]"); }catch{ return []; } }
+function save(a){ try{ localStorage.setItem(KEY,JSON.stringify(a)); }catch{} }
+function pd(s){ const[y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function today(){ const n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()); }
+function tstr(){ const t=today(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; }
+function fmt(s){ const d=pd(s); const M=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"]; return `${d.getDate()} ${M[d.getMonth()]}`; }
+function tagH(t){ const m={exam:["tag-exam","VİZE"],quiz:["tag-quiz","QUİZ"],final:["tag-final","FİNAL"],holiday:["tag-holiday","TATİL"]}; const[c,l]=m[t]||["tag-quiz",t]; return `<span class="tag ${c}">${l}</span>`; }
+
+function getStatus(c){
+  const ts=tstr(), t=today();
+  for(const r of RULES) if(ts>=r.s&&ts<=r.e) return r;
+  const ex=[...FIXED,...c].filter(e=>["exam","quiz","final"].includes(e.type));
+  const soon=ex.find(e=>{ const d=(pd(e.date)-t)/86400000; return d>=0&&d<=5; });
+  if(soon) return {label:"sınav yaklaşıyor",icon:"!",cls:"amber",desc:`${soon.name} yakında.`};
+  return {label:"müsait görünüyor",icon:"✓",cls:"green",desc:"Şu an yoğun bir dönem değil."};
+}
+
+function renderStatus(c){
+  const s=getStatus(c);
+  const ic=document.getElementById("s-icon");
+  ic.className="s-icon "+s.cls;
+  ic.textContent=s.icon;
+  document.getElementById("s-text").textContent=s.label;
+  document.getElementById("s-desc").textContent=s.desc;
+}
+
+function renderUpcoming(c){
+  const t=today();
+  const all=[...FIXED,...c.map((e,i)=>({...e,ci:i}))];
+  const list=all.filter(e=>pd(e.date)>=t&&["exam","quiz","final"].includes(e.type)).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+  const el=document.getElementById("upcoming-list");
+  if(!list.length){el.innerHTML='<div class="empty">yaklaşan sınav bulunamadı.</div>';return;}
+  el.innerHTML=list.map(e=>`<div class="ev-row"><div class="ev-date">${fmt(e.date)}</div><div style="flex:1"><div class="ev-name">${e.name}</div>${e.desc?`<div class="ev-desc">${e.desc}</div>`:""}</div>${tagH(e.type)}${e.ci!==undefined?`<button class="del-btn" onclick="delEv(${e.ci})">[sil]</button>`:""}</div>`).join("");
+}
+
+function renderFixed(){
+  const t=today();
+  const list=FIXED.filter(e=>pd(e.date)>=t).slice(0,8);
+  document.getElementById("fixed-list").innerHTML=list.map(e=>`<div class="ev-row"><div class="ev-date">${fmt(e.date)}</div><div style="flex:1"><div class="ev-name">${e.name}</div></div>${tagH(e.type)}</div>`).join("");
+}
+
+function renderDate(){
+  const d=today();
+  const M=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+  document.getElementById("today-chip").textContent=`${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function render(){ const c=load(); renderDate(); renderStatus(c); renderUpcoming(c); renderFixed(); }
+
+function toggleAdmin(){
+  const b=document.getElementById("adm-body");
+  const open=b.classList.toggle("open");
+  document.getElementById("adm-arrow").textContent=open?"▲":"▼";
+}
+
+function chkPin(){
+  if(document.getElementById("pin-in").value===PIN){
+    document.getElementById("pin-row").style.display="none";
+    document.getElementById("pin-err").style.display="none";
+    document.getElementById("form-area").style.display="block";
+  } else {
+    document.getElementById("pin-err").style.display="block";
+  }
+}
+
+function addEv(){
+  const date=document.getElementById("f-date").value;
+  const type=document.getElementById("f-type").value;
+  const name=document.getElementById("f-name").value.trim();
+  const desc=document.getElementById("f-desc").value.trim();
+  if(!date||!name) return;
+  const c=load(); c.push({date,type,name,desc}); save(c);
+  document.getElementById("f-date").value="";
+  document.getElementById("f-name").value="";
+  document.getElementById("f-desc").value="";
+  render();
+}
+
+function delEv(i){ const c=load(); c.splice(i,1); save(c); render(); }
+
+render();
+</script>
+</body>
+</html>
