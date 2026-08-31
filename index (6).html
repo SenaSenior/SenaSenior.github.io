@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sena'nın TOBB Takvimi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      background-color: #0e0e0c;
+      color: #f0efe8;
+    }
+
+    .bg-illustration {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 38vw;
+      max-width: 420px;
+      min-width: 200px;
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @media (max-width: 600px) and (orientation: portrait) {
+      .bg-illustration {
+        width: 55vw;
+        opacity: 0.35;
+      }
+    }
+
+    @media (max-width: 900px) and (orientation: landscape) {
+      .bg-illustration {
+        width: 28vw;
+      }
+    }
+
+    .wrap {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      border: 2px solid rgba(255,255,255,0.75);
+      background: rgba(10,10,8,0.72);
+      padding: 1rem 1.25rem 0.9rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+      backdrop-filter: blur(6px);
+    }
+
+    .title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: #f0efe8;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      font-size: 10px;
+      color: #9e9d98;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    .date-chip {
+      font-size: 10px;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      padding: 4px 10px;
+      border-radius: 20px;
+      color: #d0cfc8;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .card {
+      border: 2px solid rgba(255,255,255,0.18);
+      background: rgba(10,10,8,0.72);
+      backdrop-filter: blur(6px);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .status-block {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .s-icon {
+      width: 38px; height: 38px;
+      border: 2px solid rgba(255,255,255,0.6);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 17px; font-weight: 700;
+      color: #0e0e0c;
+    }
+    .s-icon.green { background: #9FE1CB; }
+    .s-icon.amber { background: #FAC775; }
+    .s-icon.red   { background: #F7C1C1; }
+
+    .s-label-top {
+      font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #6b6a65; margin-bottom: 4px;
+    }
+    .s-main { font-size: 15px; font-weight: 700; color: #f0efe8; }
+    .s-sub  { font-size: 11px; color: #9e9d98; margin-top: 3px; line-height: 1.5; }
+
+    .sec-head {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: #6b6a65; margin: 1.25rem 0 0;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sec-head::after { content:''; flex:1; height:1px; background: rgba(255,255,255,0.12); }
+
+    .ev-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.1);
+    }
+    .ev-row:last-child { border-bottom: none; }
+
+    .ev-date { font-size: 11px; font-weight: 700; color: #6b6a65; min-width: 56px; padding-top: 2px; }
+    .ev-name { font-size: 13px; color: #f0efe8; line-height: 1.4; }
+    .ev-desc { font-size: 11px; color: #9e9d98; margin-top: 2px; }
+
+    .tag {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 3px 8px; border: 1.5px solid;
+      border-radius: 0;
+      margin-left: auto; flex-shrink: 0; align-self: flex-start;
+    }
+    .tag-exam    { border-color: #f09595; color: #f09595; }
+    .tag-quiz    { border-color: #FAC775; color: #FAC775; }
+    .tag-final   { border-color: #F5C4B3; color: #F5C4B3; }
+    .tag-holiday { border-color: #C0DD97; color: #C0DD97; }
+
+    .del-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; background: none; border: none;
+      cursor: pointer; color: #6b6a65; padding: 2px 4px; flex-shrink: 0;
+    }
+    .del-btn:hover { color: #f09595; }
+
+    .empty { font-size: 12px; color: #6b6a65; padding: 10px 0; font-style: italic; }
+
+    .admin-wrap {
+      margin-top: 1.5rem;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: rgba(10,10,8,0.72);
+      backdrop-filter: blur(6px);
+    }
+
+    .admin-toggle {
+      width: 100%; text-align: left; background: none; border: none;
+      padding: 12px 16px;
+      font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: #9e9d98; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .admin-toggle:hover { color: #f0efe8; }
+
+    .admin-body { display: none; border-top: 2px solid rgba(255,255,255,0.18); padding: 14px 16px 16px; }
+    .admin-body.open { display: block; }
+
+    .pin-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .pin-err { font-size: 11px; color: #f09595; display: none; margin-bottom: 8px; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-hidden { display: none; }
+
+    input[type=text], input[type=date], select {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      height: 34px; padding: 0 10px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.06);
+      color: #f0efe8;
+      border-radius: 0; width: 100%; outline: none;
+    }
+    input[type=text]:focus, input[type=date]:focus, select:focus {
+      border-color: rgba(255,255,255,0.7);
+    }
+    select option { background: #1a1a18; color: #f0efe8; }
+
+    .btn {
+      font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 8px 16px;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.12);
+      color: #f0efe8;
+      cursor: pointer; border-radius: 0;
+    }
+    .btn:hover { background: rgba(255,255,255,0.22); }
+  </style>
+</head>
+<body>
+<img class="bg-illustration" src="SenaSeniorgithub-background1.jpeg" alt="" />
+<div class="wrap">
+
+  <div class="header">
+    <div>
+      <div class="title">Sena'nın TOBB Takvimi</div>
+      <div class="subtitle">TOBB ETÜ — İktisat Bölümü</div>
+    </div>
+    <div class="date-chip" id="today-chip"></div>
+  </div>
+
+  <div class="card">
+    <div class="status-block">
+      <div class="s-icon" id="s-icon"></div>
+      <div>
+        <div class="s-label-top">durum</div>
+        <div class="s-main" id="s-text"></div>
+        <div class="s-sub" id="s-desc"></div>
+      </div>
+    </div>
+
+    <div class="sec-head" style="margin-top:1.25rem;">yaklaşan sınavlar</div>
+    <div id="upcoming-list"></div>
+
+    <div class="sec-head">dönem takvimi</div>
+    <div id="fixed-list"></div>
+  </div>
+
+  <div class="admin-wrap">
+    <button class="admin-toggle" onclick="toggleAdmin()">
+      <span>+ sınav ekle</span>
+      <span id="adm-arrow">▼</span>
+    </button>
+    <div class="admin-body" id="adm-body">
+      <div class="pin-row" id="pin-row">
+        <input type="text" id="pin-in" placeholder="şifre" maxlength="6" style="max-width:110px;" onkeydown="if(event.key==='Enter')chkPin()"/>
+        <button class="btn" onclick="chkPin()">gir</button>
+      </div>
+      <div class="pin-err" id="pin-err">yanlış şifre</div>
+      <div class="form-hidden" id="form-area">
+        <div class="form-grid">
+          <input type="date" id="f-date"/>
+          <select id="f-type">
+            <option value="exam">vize</option>
+            <option value="quiz">quiz</option>
+            <option value="final">final</option>
+          </select>
+          <input type="text" id="f-name" placeholder="ders (örn. IKT424)" class="form-full"/>
+          <input type="text" id="f-desc" placeholder="açıklama (isteğe bağlı)" class="form-full"/>
+        </div>
+        <button class="btn" onclick="addEv()">ekle</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const PIN = "1234";
+const KEY = "sena_ev_v2";
+
+const FIXED = [
+  { date:"2026-03-30", name:"Bahar dönemi başlangıcı", type:"holiday" },
+  { date:"2026-04-23", name:"Ulusal egemenlik ve çocuk bayramı", type:"holiday" },
+  { date:"2026-05-01", name:"İşçi bayramı", type:"holiday" },
+  { date:"2026-05-19", name:"Atatürk'ü anma ve gençlik bayramı", type:"holiday" },
+  { date:"2026-06-01", name:"Bahar vize haftası başlangıcı", type:"exam" },
+  { date:"2026-06-07", name:"Bahar vize haftası sonu", type:"exam" },
+  { date:"2026-07-06", name:"Bahar final haftası başlangıcı", type:"final" },
+  { date:"2026-07-17", name:"Bahar final haftası sonu", type:"final" },
+  { date:"2026-07-20", name:"Bahar dönemi sonu", type:"holiday" },
+];
+
+const RULES = [
+  { s:"2026-06-01", e:"2026-06-07", label:"vize dönemi", icon:"✗", cls:"red",   desc:"Vizeler sürüyor — şu an pek müsait değil." },
+  { s:"2026-05-26", e:"2026-05-31", label:"vize yaklaşıyor", icon:"!", cls:"amber", desc:"Vize haftasına az kaldı." },
+  { s:"2026-07-06", e:"2026-07-17", label:"final dönemi", icon:"✗", cls:"red",   desc:"Finaller sürüyor — şu an pek müsait değil." },
+  { s:"2026-07-01", e:"2026-07-05", label:"final yaklaşıyor", icon:"!", cls:"amber", desc:"Final haftasına az kaldı." },
+  { s:"2026-07-18", e:"2026-09-05", label:"yaz tatili", icon:"✓", cls:"green", desc:"Dönem bitti! Büyük ihtimalle müsait." },
+];
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||"[]"); }catch{ return []; } }
+function save(a){ try{ localStorage.setItem(KEY,JSON.stringify(a)); }catch{} }
+function pd(s){ const[y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function today(){ const n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()); }
+function tstr(){ const t=today(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`; }
+function fmt(s){ const d=pd(s); const M=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"]; return `${d.getDate()} ${M[d.getMonth()]}`; }
+function tagH(t){ const m={exam:["tag-exam","VİZE"],quiz:["tag-quiz","QUİZ"],final:["tag-final","FİNAL"],holiday:["tag-holiday","TATİL"]}; const[c,l]=m[t]||["tag-quiz",t]; return `<span class="tag ${c}">${l}</span>`; }
+
+function getStatus(c){
+  const ts=tstr(), t=today();
+  for(const r of RULES) if(ts>=r.s&&ts<=r.e) return r;
+  const ex=[...FIXED,...c].filter(e=>["exam","quiz","final"].includes(e.type));
+  const soon=ex.find(e=>{ const d=(pd(e.date)-t)/86400000; return d>=0&&d<=5; });
+  if(soon) return {label:"sınav yaklaşıyor",icon:"!",cls:"amber",desc:`${soon.name} yakında.`};
+  return {label:"müsait görünüyor",icon:"✓",cls:"green",desc:"Şu an yoğun bir dönem değil."};
+}
+
+function renderStatus(c){
+  const s=getStatus(c);
+  const ic=document.getElementById("s-icon");
+  ic.className="s-icon "+s.cls;
+  ic.textContent=s.icon;
+  document.getElementById("s-text").textContent=s.label;
+  document.getElementById("s-desc").textContent=s.desc;
+}
+
+function renderUpcoming(c){
+  const t=today();
+  const all=[...FIXED,...c.map((e,i)=>({...e,ci:i}))];
+  const list=all.filter(e=>pd(e.date)>=t&&["exam","quiz","final"].includes(e.type)).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,6);
+  const el=document.getElementById("upcoming-list");
+  if(!list.length){el.innerHTML='<div class="empty">yaklaşan sınav bulunamadı.</div>';return;}
+  el.innerHTML=list.map(e=>`<div class="ev-row"><div class="ev-date">${fmt(e.date)}</div><div style="flex:1"><div class="ev-name">${e.name}</div>${e.desc?`<div class="ev-desc">${e.desc}</div>`:""}</div>${tagH(e.type)}${e.ci!==undefined?`<button class="del-btn" onclick="delEv(${e.ci})">[sil]</button>`:""}</div>`).join("");
+}
+
+function renderFixed(){
+  const t=today();
+  const list=FIXED.filter(e=>pd(e.date)>=t).slice(0,8);
+  document.getElementById("fixed-list").innerHTML=list.map(e=>`<div class="ev-row"><div class="ev-date">${fmt(e.date)}</div><div style="flex:1"><div class="ev-name">${e.name}</div></div>${tagH(e.type)}</div>`).join("");
+}
+
+function renderDate(){
+  const d=today();
+  const M=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+  document.getElementById("today-chip").textContent=`${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function render(){ const c=load(); renderDate(); renderStatus(c); renderUpcoming(c); renderFixed(); }
+
+function toggleAdmin(){
+  const b=document.getElementById("adm-body");
+  const open=b.classList.toggle("open");
+  document.getElementById("adm-arrow").textContent=open?"▲":"▼";
+}
+
+function chkPin(){
+  if(document.getElementById("pin-in").value===PIN){
+    document.getElementById("pin-row").style.display="none";
+    document.getElementById("pin-err").style.display="none";
+    document.getElementById("form-area").style.display="block";
+  } else {
+    document.getElementById("pin-err").style.display="block";
+  }
+}
+
+function addEv(){
+  const date=document.getElementById("f-date").value;
+  const type=document.getElementById("f-type").value;
+  const name=document.getElementById("f-name").value.trim();
+  const desc=document.getElementById("f-desc").value.trim();
+  if(!date||!name) return;
+  const c=load(); c.push({date,type,name,desc}); save(c);
+  document.getElementById("f-date").value="";
+  document.getElementById("f-name").value="";
+  document.getElementById("f-desc").value="";
+  render();
+}
+
+function delEv(i){ const c=load(); c.splice(i,1); save(c); render(); }
+
+render();
+</script>
+</body>
+</html>
